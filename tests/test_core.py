@@ -192,6 +192,26 @@ def test_gate_defines_unique_blocking_checks():
     assert any(c.blocking for c in checks)
 
 
+@pytest.mark.parametrize(
+    "env_text,expected",
+    [
+        ("APOLLO_API_KEY=abc123\n", True),
+        ("APOLLO_API_KEY=  abc123\n", True),
+        ("APOLLO_API_KEY=\n\n# comment\nOTHER=1\n", False),   # the bug: was reading ahead
+        ("APOLLO_API_KEY=\n", False),
+        ("# APOLLO_API_KEY=abc\n", False),
+        ("", False),
+    ],
+)
+def test_env_key_set_does_not_read_across_lines(env_text, expected):
+    """An empty KEY= followed by a comment must not count as configured.
+
+    Found by running the gate on a fresh clone: `\\s*` in the original regex matched the
+    newline, so the next line's first non-space character was read as the key's value.
+    """
+    assert privacy_gate.env_key_set(env_text, "APOLLO_API_KEY") is expected
+
+
 def test_gate_status_always_exits_zero():
     result = subprocess.run(
         [sys.executable, str(REPO_ROOT / "scripts" / "privacy_gate.py"), "--status"],

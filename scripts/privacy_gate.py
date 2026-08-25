@@ -49,6 +49,16 @@ def _read(path) -> str:
     return path.read_text(encoding="utf-8", errors="replace") if path.exists() else ""
 
 
+def env_key_set(env_text: str, key: str) -> bool:
+    """True only when the key has a real value on its own line.
+
+    Note the character class: `\\s*` would match the newline and let the next line's first
+    non-space character count as the value, so an empty `KEY=` followed by a comment read as
+    "set". That false pass was found by running the gate on a fresh clone.
+    """
+    return bool(re.search(rf"^{re.escape(key)}=[ \t]*\S+", env_text, re.M))
+
+
 def run_checks(config: dict) -> list[Check]:
     checks: list[Check] = []
     limits = config["limits"]
@@ -104,7 +114,7 @@ def run_checks(config: dict) -> list[Check]:
     # G5 - master key removed after the audit
     c = Check("G5", "master API key not left lying around")
     env = _read(ENV_PATH)
-    has_master = bool(re.search(r"^APOLLO_MASTER_API_KEY=\s*\S+", env, re.M))
+    has_master = env_key_set(env, "APOLLO_MASTER_API_KEY")
     audit_done = (REPORTS / "PRIVACY_ACCESS_AUDIT.md").exists()
     if has_master and audit_done:
         c.result(False, "audit is done - revoke the master key in Apollo and clear it from .env")
@@ -116,8 +126,10 @@ def run_checks(config: dict) -> list[Check]:
 
     # G6 - scoped key present
     c = Check("G6", "scoped API key configured")
-    c.result(bool(re.search(r"^APOLLO_API_KEY=\s*\S+", env, re.M)),
-             "set APOLLO_API_KEY in .env (scopes: docs/07 sec.4)")
+    if env_key_set(env, "APOLLO_API_KEY"):
+        c.result(True, "APOLLO_API_KEY is set")
+    else:
+        c.result(False, "APOLLO_API_KEY is empty or missing in .env (scopes: docs/07 sec.4)")
     checks.append(c)
 
     # G7 - suppression seeded
