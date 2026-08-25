@@ -39,12 +39,12 @@ master database local, and executable gates the agent cannot talk its way past.
 |---|---|
 | `CLAUDE.md` | The agent's operating manual: hard rules, safety gates, workflow order. |
 | `.claude/skills/*` | 8 skills — privacy audit, safety gate, ICP sourcing, credit-safe enrichment, sequence ops, local master DB, RO lead scoring, RO/EN outbound copy. |
-| `.claude/commands/*` | Slash commands: `/apollo-start`, `/privacy-gate`, `/source-batch`, `/push-batch`, `/weekly-report`. |
+| `.claude/commands/*` | 9 slash commands, one per workflow stage: `/apollo-start` `/privacy-audit` `/canary-test` `/privacy-gate` `/import-master` `/source-batch` `/push-batch` `/weekly-report` `/verify-docs`. |
 | `scripts/*.py` | Zero-dependency Python (stdlib only): Apollo client with rate-limit + credit guard, access audit, privacy gate, local master DB, batch selection, dry-run push, activity pull-back. |
 | `mcp/local_master_mcp.py` | Optional stdio MCP server exposing the local master DB + gate status as agent tools. Hand-rolled JSON-RPC, no dependencies. |
 | `docs/*` | The research: capability matrix, data architecture, privacy audit + test templates, GDPR-RO, deliverability, credits & rate limits, 30-day runbook. |
 | `db/schema.sql` | SQLite master schema — companies, contacts, suppression, outreach log, audit trail. |
-| `tests/` | pytest suite for dedupe, suppression, gate logic and dry-run safety. |
+| `tests/` | 41 pytest cases: normalisation, dedupe keys, suppression, the push allow-list, gate logic. |
 
 ---
 
@@ -54,7 +54,7 @@ Requires Python 3.11+ (the scripts use `tomllib`). Nothing to `pip install` — 
 standard library only.
 
 ```bash
-git clone https://github.com/<owner>/apollo-outbound-agent.git
+git clone https://github.com/Eduard22222222/apollo-outbound-agent.git
 cd apollo-outbound-agent
 cp .env.example .env
 cp config/operator.example.toml config/operator.toml
@@ -110,7 +110,8 @@ mcp/                   local-master MCP server - read-only tools over the local 
 db/schema.sql          companies, contacts, suppression, batches, outreach_log,
                        credit_ledger, audit_log, gate_runs
 docs/                  the research and the templates
-tests/                 35 tests: normalisation, suppression, the push allow-list, the gate
+tests/                 41 tests: normalisation, suppression, the push allow-list, the gate
+ci/                    GitHub Actions workflow - move to .github/workflows/ to activate
 ```
 
 ---
