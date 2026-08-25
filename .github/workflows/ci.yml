@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dev dependencies
+        run: python -m pip install --upgrade pip pytest ruff
+      - name: Lint
+        run: ruff check scripts mcp tests
+      - name: Test
+        run: python -m pytest tests -q
+
+  guardrails:
+    # The repo's own safety properties, asserted in CI so a future edit cannot quietly
+    # remove them.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: No secrets committed
+        run: |
+          ! git ls-files | grep -E '(^|/)\.env$|operator\.toml$|\.sqlite$|canary\.json$'
+      - name: Dry run is the default everywhere
+        run: |
+          for f in scripts/push_to_apollo.py scripts/import_master.py scripts/select_batch.py \
+                   scripts/suppress.py scripts/canary.py scripts/retention.py; do
+            grep -q '"--execute", action="store_true"' "$f" || { echo "$f lost --execute"; exit 1; }
+          done
+      - name: Gate can never report HIGH confidence
+        run: |
+          ! grep -rn 'data_isolation_confidence.*HIGH' scripts/ || exit 1
+          grep -q 'HIGH is not an available value' scripts/privacy_gate.py
+      - name: Proprietary fields stay out of the push allow-list
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, "scripts")
+          import push_to_apollo as p
+          banned = {"score", "score_reason", "turnover", "profit", "cui", "caen",
+                    "source", "notes"}
+          leaked = banned & set(p.PUSHABLE_FIELDS)
+          assert not leaked, f"proprietary fields in the allow-list: {leaked}"
+          print("allow-list clean:", p.PUSHABLE_FIELDS)
+          PY

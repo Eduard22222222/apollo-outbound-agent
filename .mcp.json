@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "apollo": {
+      "type": "http",
+      "url": "https://mcp.apollo.io/mcp"
+    },
+    "local-master": {
+      "command": "python",
+      "args": ["mcp/local_master_mcp.py"]
+    }
+  }
+}

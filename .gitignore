@@ -1,0 +1,28 @@
+# secrets and personal data - never commit
+.env
+config/operator.toml
+db/*.sqlite
+db/*.sqlite-wal
+db/*.sqlite-shm
+db/canary.json
+backups/
+data/raw/*
+!data/raw/.gitkeep
+batches/
+gate.json
+
+# reports contain real contact data
+docs/reports/*
+!docs/reports/.gitkeep
+
+# python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.ruff_cache/
+
+# os
+.DS_Store
+Thumbs.db

@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/privacy_gate.py:*)",
+      "Bash(python scripts/credit_guard.py:*)",
+      "Bash(python scripts/init_db.py:*)",
+      "Bash(python scripts/score_master.py:*)",
+      "Bash(python scripts/select_batch.py:*)",
+      "Bash(python scripts/suppress.py --check:*)",
+      "Bash(python scripts/suppress.py --list:*)",
+      "Bash(python scripts/check_dns.py:*)",
+      "Bash(python scripts/backup_master.py:*)",
+      "Bash(python scripts/apollo_client.py --ping:*)",
+      "Bash(python scripts/apollo_client.py --rate:*)",
+      "Bash(python -m pytest:*)",
+      "Read(//**)",
+      "WebFetch(domain:docs.apollo.io)",
+      "WebFetch(domain:knowledge.apollo.io)"
+    ],
+    "ask": [
+      "Bash(python scripts/push_to_apollo.py:*)",
+      "Bash(python scripts/import_master.py:*)",
+      "Bash(python scripts/pull_activity.py:*)",
+      "Bash(python scripts/canary.py:*)",
+      "Bash(python scripts/retention.py:*)",
+      "Bash(python scripts/audit_access.py:*)",
+      "Bash(git push:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./db/*.sqlite)",
+      "Read(./backups/**)",
+      "Bash(python scripts/push_to_apollo.py --skip-gate:*)",
+      "Bash(curl:*api.apollo.io*)",
+      "Bash(wget:*api.apollo.io*)"
+    ]
+  }
+}

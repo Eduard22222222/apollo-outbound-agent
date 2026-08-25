@@ -1,0 +1,38 @@
+# Copy to config/operator.toml and fill in.  This file is git-ignored once copied.
+# Secrets never go here - they live in .env.
+
+[operator]
+name              = "Your Name"
+apollo_user_id    = ""                      # from scripts/audit_access.py, or Apollo settings
+sending_mailbox   = "outreach@get-yourcompany.ro"
+sending_domain    = "get-yourcompany.ro"    # the COLD domain, never the primary one (docs/06)
+privacy_notice_url = "https://yourcompany.ro/privacy-outbound"
+
+[workspace]
+plan         = "professional"               # free | basic | professional | organization
+admins       = ["admin@yourcompany.ro"]
+other_users  = ["colleague@yourcompany.ro"]
+
+[data]
+master_db = "db/master.sqlite"
+raw_dir   = "data/raw"
+
+[limits]
+max_batch_size      = 25      # contacts per batch
+credits_per_batch   = 50      # hard ceiling per batch
+credits_per_day     = 200     # hard ceiling per day
+daily_send_cap      = 40      # emails/day across all mailboxes
+per_mailbox_cap     = 30      # emails/day per mailbox (docs/06 warm-up table)
+cooldown_days       = 180     # before a contact may be approached again
+retention_days      = 730     # purge never-engaged contacts after this
+canary_max_age_days = 180     # gate fails when the canary test is older
+audit_max_age_days  = 365     # gate fails when the access audit is older
+
+[icp]
+min_employees  = 20
+max_employees  = 5000
+countries      = ["RO"]
+caen_prefixes  = []           # e.g. ["10", "46", "47"] - RO activity codes
+min_turnover   = 0            # RON
+titles         = ["Marketing Manager", "Brand Manager", "Director Marketing"]
+seniorities    = ["director", "vp", "head", "manager", "owner", "c_suite"]
